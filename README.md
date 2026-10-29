@@ -2,12 +2,31 @@
 
 某些網站閒置太久會自動登出。這個 Chrome 擴充功能會在你指定網域的分頁「沒在使用」超過設定時間後，自動重新整理該分頁，以維持登入狀態。
 
+## 專案結構
+
+```
+├── idle-tab-refresher/   # 擴充功能本體（manifest.json 所在處）
+├── tests/                # lib/domain.js、lib/settings.js 的單元測試
+├── package.json          # 僅供 npm test 使用
+└── SPEC.md               # 規格文件
+```
+
 ## 安裝
 
 1. 開啟 `chrome://extensions`。
 2. 開啟右上角的「開發人員模式」。
-3. 點「載入未封裝項目」，選擇本資料夾（`idle-tab-refresher/`，也就是 `manifest.json` 所在的資料夾）。
+3. 點「載入未封裝項目」，選擇 `idle-tab-refresher/` 資料夾（`manifest.json` 所在的資料夾，不是 repo 根目錄）。
 4. 需要 Chrome 121 以上版本。
+
+## 打包上架
+
+在 repo 根目錄執行，產生可上傳到 Chrome Web Store 的 zip（`manifest.json` 位於 zip 最上層）：
+
+```bash
+cd idle-tab-refresher && zip -r -X ../idle-tab-refresher-1.0.0.zip . -x "*.DS_Store"
+```
+
+每次上傳新版前，先調高 `idle-tab-refresher/manifest.json` 的 `version`，並修改 zip 檔名中的版本號。
 
 ## 使用方式
 
@@ -29,9 +48,9 @@
 
 ### 測試建議
 
-把兩個時間都設為 1 分鐘即可快速驗證。若要看每次檢查的判斷過程，將 `background.js` 開頭的 `DEBUG` 改為 `true`，並在 `chrome://extensions` 點本擴充功能的「Service Worker」開啟 DevTools。
+把兩個時間都設為 1 分鐘即可快速驗證。若要看每次檢查的判斷過程，將 `idle-tab-refresher/background.js` 開頭的 `DEBUG` 改為 `true`，並在 `chrome://extensions` 點本擴充功能的「Service Worker」開啟 DevTools。
 
-網域處理的單元測試（需 Node 18+），在專案根目錄執行：
+網域處理的單元測試（需 Node 18+），在 repo 根目錄執行：
 
 ```bash
 npm test
