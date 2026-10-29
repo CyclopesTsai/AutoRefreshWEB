@@ -2,11 +2,21 @@
 
 某些網站閒置太久會自動登出。這個 Chrome 擴充功能會在你指定網域的分頁「沒在使用」超過設定時間後，自動重新整理該分頁，以維持登入狀態。
 
+![Idle Tab Refresher 介紹](docs/screenshots/1-overview.png)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/2-settings.png" alt="時間設定"></td>
+    <td><img src="docs/screenshots/3-privacy-dark.png" alt="隱私與深色模式"></td>
+  </tr>
+</table>
+
 ## 專案結構
 
 ```
 ├── idle-tab-refresher/   # 擴充功能本體（manifest.json 所在處）
 ├── tests/                # lib/domain.js、lib/settings.js 的單元測試
+├── docs/screenshots/     # 商店截圖（1280×800，24 位元 PNG）
 └── package.json          # 僅供 npm test 使用
 ```
 
