@@ -1,0 +1,15 @@
+# Spec (local only)
+SPEC.md
+
+# Packaged extension
+*.zip
+*.crx
+*.pem
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Node
+node_modules/

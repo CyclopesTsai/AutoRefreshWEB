@@ -7,8 +7,7 @@
 ```
 ├── idle-tab-refresher/   # 擴充功能本體（manifest.json 所在處）
 ├── tests/                # lib/domain.js、lib/settings.js 的單元測試
-├── package.json          # 僅供 npm test 使用
-└── SPEC.md               # 規格文件
+└── package.json          # 僅供 npm test 使用
 ```
 
 ## 安裝
