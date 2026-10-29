@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Idle Tab Refresher 設定</title>
+    <link rel="stylesheet" href="options.css" />
+    <script type="module" src="options.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Idle Tab Refresher 設定</h1>
+
+      <section>
+        <label class="switch-row">
+          <input type="checkbox" id="enabled" />
+          <span>啟用自動重新整理</span>
+        </label>
+      </section>
+
+      <section>
+        <h2>網域清單</h2>
+        <p class="hint">符合網域本身及其所有子網域的分頁都會被處理，例如 <code>example.com</code> 也包含 <code>sub.example.com</code>。</p>
+        <form id="add-form" class="add-row" novalidate>
+          <input
+            type="text"
+            id="domain-input"
+            placeholder="例如 example.com"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="domain-message"
+          />
+          <button type="submit">新增</button>
+        </form>
+        <p id="domain-message" class="message" role="status" aria-live="polite"></p>
+        <ul id="domain-list" class="domain-list"></ul>
+        <p id="domain-empty" class="empty">尚未新增任何網域。</p>
+      </section>
+
+      <section>
+        <h2>時間設定</h2>
+        <div class="field">
+          <label for="tabIdleMinutes">分頁閒置判定（分鐘）</label>
+          <input type="number" id="tabIdleMinutes" min="1" max="1440" step="1" />
+          <p class="hint">分頁超過這段時間沒被切換使用，就視為閒置。</p>
+          <p class="message error" data-error-for="tabIdleMinutes"></p>
+        </div>
+        <div class="field">
+          <label for="refreshIntervalMinutes">重新整理間隔（分鐘）</label>
+          <input type="number" id="refreshIntervalMinutes" min="1" max="1440" step="1" />
+          <p class="hint">分頁進入閒置後，每隔多久重新整理一次。</p>
+          <p class="message error" data-error-for="refreshIntervalMinutes"></p>
+        </div>
+        <label class="switch-row">
+          <input type="checkbox" id="useSystemIdle" />
+          <span>整台電腦閒置或螢幕鎖定時，也視為分頁閒置</span>
+        </label>
+        <p id="save-status" class="message" role="status" aria-live="polite"></p>
+      </section>
+
+      <footer class="warning">
+        ⚠️ 自動重新整理會讓分頁內未儲存的輸入消失，請勿用於正在填寫表單的頁面。
+      </footer>
+    </main>
+  </body>
+</html>

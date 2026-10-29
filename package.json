@@ -1,0 +1,8 @@
+{
+  "name": "idle-tab-refresher",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}
