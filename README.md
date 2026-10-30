@@ -76,3 +76,7 @@ npm test
 ## 隱私聲明
 
 本擴充功能不收集、不傳送任何資料，不連線到任何外部伺服器，也不使用遠端程式碼。設定只儲存在 Chrome 的 `chrome.storage`（會隨你的 Google 帳號同步）。完整內容請見[隱私權政策](docs/privacy.md)。
+
+## 授權
+
+本專案以 [MIT License](LICENSE) 授權。
