@@ -1,7 +1,23 @@
 // 設定頁（SPEC §8）
 
 import { domainToPatterns, normalizeDomain, originsToRevoke } from "./lib/domain.js";
-import { getSettings, MAX_MINUTES, MIN_MINUTES, parseMinutes, saveSettings } from "./lib/settings.js";
+import { describePingStatus, PING_STATUS_KEY } from "./lib/ping-status.js";
+import {
+  getDomainMode,
+  getSettings,
+  MAX_MINUTES,
+  MIN_MINUTES,
+  MODE_PING,
+  MODE_RELOAD,
+  parseMinutes,
+  saveSettings,
+  withDomainMode,
+} from "./lib/settings.js";
+
+const MODE_LABELS = [
+  [MODE_RELOAD, "重新整理頁面"],
+  [MODE_PING, "背景保持連線（不清除輸入）"],
+];
 
 const $ = (id) => document.getElementById(id);
 
@@ -55,45 +71,99 @@ async function requestPermission(domain) {
   }
 }
 
+async function getPingStatuses() {
+  try {
+    const { [PING_STATUS_KEY]: map } = await chrome.storage.session.get(PING_STATUS_KEY);
+    return map && typeof map === "object" ? map : {};
+  } catch {
+    return {};
+  }
+}
+
+function createButton(text, className, focusKey, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = text;
+  if (className) button.className = className;
+  button.dataset.focusKey = focusKey;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function createModeGroup(domain, index) {
+  const group = document.createElement("div");
+  group.className = "modes";
+  group.setAttribute("role", "radiogroup");
+  group.setAttribute("aria-label", `${domain} 的處理方式`);
+
+  const selected = getDomainMode(current, domain);
+  for (const [mode, text] of MODE_LABELS) {
+    const label = document.createElement("label");
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = `mode-${index}`;
+    radio.value = mode;
+    radio.checked = mode === selected;
+    radio.dataset.focusKey = `mode:${domain}:${mode}`;
+    radio.addEventListener("change", () => onModeChange(domain, mode));
+    label.append(radio, text);
+    group.append(label);
+  }
+  return group;
+}
+
 async function renderDomains() {
   if (!current) return;
   const domains = current.domains;
-  const granted = await Promise.all(domains.map(hasPermission));
+  const [granted, pingStatuses] = await Promise.all([
+    Promise.all(domains.map(hasPermission)),
+    getPingStatuses(),
+  ]);
+
+  // 重新繪製後把焦點放回原本的控制項（例如用方向鍵切換選項時）
+  const focusKey = document.activeElement?.dataset?.focusKey;
 
   els.domainList.replaceChildren(
     ...domains.map((domain, i) => {
       const li = document.createElement("li");
 
+      const main = document.createElement("div");
+      main.className = "row-main";
       const name = document.createElement("span");
       name.className = "name";
       name.textContent = domain;
-      li.append(name);
+      main.append(name);
 
       if (!granted[i]) {
         const badge = document.createElement("span");
         badge.className = "badge";
         badge.textContent = "未授權";
-        li.append(badge);
-
-        const grant = document.createElement("button");
-        grant.type = "button";
-        grant.textContent = "重新授權";
-        grant.addEventListener("click", () => onRegrant(domain));
-        li.append(grant);
+        main.append(badge, createButton("重新授權", "", `grant:${domain}`, () => onRegrant(domain)));
       }
 
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "danger";
-      remove.textContent = "刪除";
+      const remove = createButton("刪除", "danger", `remove:${domain}`, () => onRemove(domain));
       remove.setAttribute("aria-label", `刪除 ${domain}`);
-      remove.addEventListener("click", () => onRemove(domain));
-      li.append(remove);
+      main.append(remove);
+      li.append(main, createModeGroup(domain, i));
+
+      if (getDomainMode(current, domain) === MODE_PING) {
+        const { text, kind } = describePingStatus(pingStatuses[domain]);
+        const status = document.createElement("p");
+        status.className = `ping-status${kind ? ` ${kind}` : ""}`;
+        status.textContent = text;
+        li.append(status);
+      }
 
       return li;
     }),
   );
   els.domainEmpty.hidden = domains.length > 0;
+
+  if (focusKey) {
+    [...els.domainList.querySelectorAll("[data-focus-key]")]
+      .find((el) => el.dataset.focusKey === focusKey)
+      ?.focus();
+  }
 }
 
 function renderFields() {
@@ -172,6 +242,17 @@ async function onRemove(domain) {
   await renderDomains();
 }
 
+async function onModeChange(domain, mode) {
+  const latest = await getSettings();
+  current = await saveSettings({ domainModes: withDomainMode(latest.domainModes, domain, mode) });
+  showMessage(
+    els.domainMessage,
+    mode === MODE_PING ? `${domain} 改為背景保持連線` : `${domain} 改為重新整理頁面`,
+    "ok",
+  );
+  await renderDomains();
+}
+
 async function onToggle(event) {
   const input = event.currentTarget;
   current = await saveSettings({ [input.id]: input.checked });
@@ -198,8 +279,9 @@ els.refreshIntervalMinutes.addEventListener("change", onMinutesChange);
 els.domainInput.addEventListener("input", () => showMessage(els.domainMessage, ""));
 
 // 其他設定頁或 chrome://extensions 的變更也同步顯示
-chrome.storage.onChanged.addListener((_changes, areaName) => {
+chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === "sync") refresh();
+  else if (areaName === "session" && changes[PING_STATUS_KEY]) renderDomains();
 });
 chrome.permissions.onAdded.addListener(() => renderDomains());
 chrome.permissions.onRemoved.addListener(() => renderDomains());

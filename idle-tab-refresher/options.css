@@ -10,6 +10,7 @@
   --warn-bg: #fff8c5;
   --warn-border: #d4a72c;
   --row-bg: #f6f8fa;
+  --warn: #9a6700;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +25,7 @@
     --warn-bg: #2e2a12;
     --warn-border: #9e6a03;
     --row-bg: #161b22;
+    --warn: #d29922;
   }
 }
 
@@ -157,14 +159,55 @@ button.danger:hover {
 }
 
 .domain-list li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   padding: 8px 12px;
   margin-bottom: 6px;
   background: var(--row-bg);
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+.domain-list .row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.domain-list .modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+
+.domain-list .modes label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.domain-list .modes input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.domain-list .ping-status {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.domain-list .ping-status.ok {
+  color: var(--ok);
+}
+
+.domain-list .ping-status.warn {
+  color: var(--warn);
+}
+
+.domain-list .ping-status.error {
+  color: var(--error);
 }
 
 .domain-list .name {

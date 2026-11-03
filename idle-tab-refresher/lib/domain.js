@@ -111,7 +111,9 @@ export function domainsToPatterns(domains) {
 }
 
 /**
- * 回傳 URL 符合的網域；協定不是 http/https 或不符合任何網域時回傳 null。
+ * 回傳 URL 符合的網域；同時符合多個時取最精確（最長）的那個，
+ * 例如清單有 example.com 與 sub.example.com 時，sub.example.com 的分頁對應後者。
+ * 協定不是 http/https 或不符合任何網域時回傳 null。
  * @param {string | undefined} url
  * @param {string[]} domains
  * @returns {string | null}
@@ -125,7 +127,13 @@ export function matchUrl(url, domains) {
     return null;
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
-  return domains.find((d) => hostMatchesDomain(parsed.hostname, d)) ?? null;
+  let best = null;
+  for (const d of domains) {
+    if (hostMatchesDomain(parsed.hostname, d) && (best === null || d.length > best.length)) {
+      best = d;
+    }
+  }
+  return best;
 }
 
 /**

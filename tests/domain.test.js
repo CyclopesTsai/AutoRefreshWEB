@@ -118,6 +118,12 @@ test("matchUrl: protocol and domain checks", () => {
   assert.equal(matchUrl("not a url", domains), null);
 });
 
+test("matchUrl: picks the most specific domain", () => {
+  assert.equal(matchUrl("https://a.sub.example.com/", ["example.com", "sub.example.com"]), "sub.example.com");
+  assert.equal(matchUrl("https://a.sub.example.com/", ["sub.example.com", "example.com"]), "sub.example.com");
+  assert.equal(matchUrl("https://other.example.com/", ["sub.example.com", "example.com"]), "example.com");
+});
+
 test("dedupeDomains keeps first occurrence order", () => {
   assert.deepEqual(dedupeDomains(["a.com", "b.com", "a.com"]), ["a.com", "b.com"]);
 });
@@ -141,6 +147,7 @@ test("sanitizeSettings fills defaults and normalizes domains", () => {
     tabIdleMinutes: 10,
     refreshIntervalMinutes: 20,
     useSystemIdle: true,
+    domainModes: {},
   });
   const s = sanitizeSettings({
     enabled: false,
@@ -155,5 +162,6 @@ test("sanitizeSettings fills defaults and normalizes domains", () => {
     tabIdleMinutes: 10,
     refreshIntervalMinutes: 30,
     useSystemIdle: true,
+    domainModes: {},
   });
 });
